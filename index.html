@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cassino</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="game-container">
+      <div class="top-section">
+        <div class="computer-hand">
+          <div class="computer-pos" id="cpu-pos-a"></div>
+          <div class="computer-pos" id="cpu-pos-b"></div>
+          <div class="computer-pos" id="cpu-pos-c"></div>
+          <div class="template-card" id="temp"></div>
+        </div>
+        <div class="margin"></div>
+      </div>
+      <div class="space"></div>
+      <div class="middle-section">
+        <div class="table">
+          <div class="table-pos" id="tab-pos-a"></div>
+          <div class="table-pos" id="tab-pos-b"></div>
+          <div class="table-pos" id="tab-pos-c"></div>
+          <div class="table-pos" id="tab-pos-d"></div>
+          <div class="template-card" id="temp1"></div>
+        </div>
+        <div class="deck"></div>
+      </div>
+      <div class="divisor">
+        <div class="space">
+          <button class="btn">Play Cards</button>
+          <div class="margin"></div>
+        </div>
+      </div>
+      <div class="bottom-section">
+        <div class="player-hand">
+          <div class="player-pos" id="player-pos-a"></div>
+          <div class="player-pos" id="player-pos-b"></div>
+          <div class="player-pos" id="player-pos-c"></div>
+          <div class="template-card" id="temp2"></div>
+        </div>
+        <div class="margin"></div>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="deck.js"></script>
+  </body>
+</html>
