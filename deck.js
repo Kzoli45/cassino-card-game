@@ -279,6 +279,156 @@ function selectAnimation(card) {
     }
 }
 
+let selectedFromPlayer = []
+let selectedFromTable = []
+
+let cardsWonByPlayer = []
+let playerFinalCards = []
+
+playCardsButton.addEventListener('click', () => {
+    selectedFromPlayer = [];
+    selectedFromTable = [];
+    const selectedCards = document.querySelectorAll('.selected')
+    selectedCards.forEach((card)  => {
+        if (card.closest('.player-pos')) {
+            selectedFromPlayer.push(card.id)
+        }
+        else if (card.closest('.table-pos')) {
+            selectedFromTable.push(card.id)
+        }
+        selectAnimation(card)
+    })
+
+    //console.log(selectedFromPlayer)
+    //console.log(selectedFromTable)
+    if (selectedFromPlayer.length === 1 && selectedFromTable.length === 0) {
+        let highestNumber = 0;
+        document.querySelectorAll('[id^="tab-pos-"]').forEach(element => {
+            const number = parseInt(element.id.replace('tab-pos-', ''), 10)
+            highestNumber = Math.max(highestNumber, number)
+        })
+        const newId = 'tab-pos-' + (highestNumber + 1)
+
+        const newTablePosition = createElement('div')
+        addClass(newTablePosition, 'table-pos')
+        
+        const table = document.querySelector('.table')
+        appendChild(table, newTablePosition)
+
+        addID(newTablePosition, newId)
+
+        placeCardOnTable(newTablePosition)
+    }
+    else {
+        moveCardsToWonDeck()
+    }
+})
+
+function placeCardOnTable(newParent) {
+    const movedCard = document.getElementById(selectedFromPlayer[0]);
+    const parent = movedCard.parentNode;
+
+    parent.removeChild(movedCard);
+    newParent.appendChild(movedCard);
+    
+    const originalPos = parent.getBoundingClientRect()
+    const newPosition = newParent.getBoundingClientRect()
+
+    anime({
+        targets: movedCard,
+        translateX: [originalPos.left - newPosition.left, 0],
+        translateY: [(originalPos.top - newPosition.top) - 20, 0],
+        easing: 'easeInOutQuad',
+        duration: 600,
+    });
+}
+
+const wonDeck = document.getElementById('player-wonDeck')
+
+function moveCardsToWonDeck() {
+    let playerSum = 0
+    let tableSum = 0
+
+    for (let i = 0; i < selectedFromPlayer.length; i++) {
+        playerSum += parseInt(getValue(selectedFromPlayer[i]))
+    }
+    //console.log(playerSum)
+
+    for (let i = 0; i < selectedFromTable.length; i++) {
+        tableSum += parseInt(getValue(selectedFromTable[i]))
+    }
+    //console.log(tableSum)
+
+    if (playerSum <= 13 && tableSum <= 13 && playerSum === tableSum) {
+        cardsWonByPlayer = []
+        selectedFromPlayer.forEach(card => {
+            cardsWonByPlayer.push(card)
+            playerFinalCards.push(card)
+        })
+        selectedFromTable.forEach(card => {
+            cardsWonByPlayer.push(card)
+            playerFinalCards.push(card)
+        })
+        console.log(cardsWonByPlayer)
+        console.log(playerFinalCards)
+        cardsWonByPlayer.forEach((element) => {
+            const card = document.getElementById(element)
+            const parent = card.parentNode
+            const grandParent = parent.parentNode
+
+            const originalPos = parent.getBoundingClientRect();
+            const newPosition = wonDeck.getBoundingClientRect();
+            
+            moveCard(card, parent, wonDeck)
+            card.style.position = 'absolute'
+
+            anime({
+                begin: () => {
+                    wonDeck.style.opacity = 1
+                },
+                targets: card,
+                translateX: [originalPos.left - newPosition.left, 0],
+                translateY: [(originalPos.top - newPosition.top)-20, 0],
+                easing: 'easeInOutQuad',
+                duration: 1200,
+                update: function (anim) {
+                    if (anim.progress > 20) {
+                        card.classList.remove('flip')
+                    }
+                },
+                complete: () => {
+                    wonDeck.style.opacity = 0
+                    wonDeck.removeChild(card)
+                }
+            })
+            if (parent.classList.contains('table-pos')) {
+                grandParent.removeChild(parent)
+            }
+        })
+    }
+}
+
+function getValue(card) {
+    const temp = card.split('-')
+    let value = temp[1]
+
+    if (value === 'A') {
+        return 1
+    }
+    else if (value === 'K') {
+        return 13
+    }
+    else if (value === 'Q') {
+        return 12
+    }
+    else if (value === 'J') {
+        return 11
+    }
+    else {
+        return value
+    }
+}
+
 function startGame() {
     createDeck()
     shuffleDeck()
