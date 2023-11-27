@@ -213,13 +213,16 @@ function animateCard(cardElement, targetPosition, index, shouldFlip) {
         targets: cardElement,
         translateX:  [rectCard.left - rectTarget.left, 0],
         translateY:  [rectCard.top - rectTarget.top, 0],
-        easing: 'easeInOutQuad',
+        easing: 'easeOutQuad',
         duration: 500,
         opacity: 1,
         delay: index * 500,
         complete: () => {
             if (shouldFlip) {
                 cardElement.classList.add('flip')
+            }
+            if (cardElement.parentNode.classList.contains('player-pos')) {
+                cardElement.style.boxShadow = '0 0 0 .05em rgb(0 0 0)';
             }
         }
     });
@@ -338,9 +341,15 @@ function placeCardOnTable(newParent) {
         targets: movedCard,
         translateX: [originalPos.left - newPosition.left, 0],
         translateY: [(originalPos.top - newPosition.top) - 20, 0],
-        easing: 'easeInOutQuad',
+        easing: 'easeOutQuad',
         duration: 600,
     });
+    if (parent.classList.contains('player-pos')) {
+        if (parent.children.length === 0) {
+            console.log('haha')
+            parent.style.display = 'none'
+            }
+        }
 }
 
 const wonDeck = document.getElementById('player-wonDeck')
@@ -389,8 +398,8 @@ function moveCardsToWonDeck() {
                 targets: card,
                 translateX: [originalPos.left - newPosition.left, 0],
                 translateY: [(originalPos.top - newPosition.top)-20, 0],
-                easing: 'easeInOutQuad',
-                duration: 1200,
+                easing: 'easeOutCubic',
+                duration: 1500,
                 update: function (anim) {
                     if (anim.progress > 20) {
                         card.classList.remove('flip')
@@ -403,6 +412,11 @@ function moveCardsToWonDeck() {
             })
             if (parent.classList.contains('table-pos')) {
                 grandParent.removeChild(parent)
+            }
+            if (parent.classList.contains('player-pos')) {
+                if (parent.children.length === 0) {
+                    parent.style.display = 'none'
+                }
             }
         })
     }
