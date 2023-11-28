@@ -284,9 +284,13 @@ function selectAnimation(card) {
 
 let selectedFromPlayer = []
 let selectedFromTable = []
+let selectedFromComputer = []
 
 let cardsWonByPlayer = []
 let playerFinalCards = []
+
+let cardsWonByComputer = []
+let computerFinalCards = []
 
 playCardsButton.addEventListener('click', () => {
     selectedFromPlayer = [];
@@ -325,6 +329,10 @@ playCardsButton.addEventListener('click', () => {
     else {
         moveCardsToWonDeck()
     }
+
+    setTimeout(() => {
+        computerMove();
+    }, 2000);
 })
 
 function placeCardOnTable(newParent) {
@@ -346,7 +354,7 @@ function placeCardOnTable(newParent) {
     });
     if (parent.classList.contains('player-pos')) {
         if (parent.children.length === 0) {
-            console.log('haha')
+            //console.log('haha')
             parent.style.display = 'none'
             }
         }
@@ -420,28 +428,6 @@ function moveCardsToWonDeck() {
             }
         })
     }
-    else if(playerSum > 13 || tableSum > 13) {
-        sendMessage('problem13')
-    }
-    else if(playerSum !== tableSum) {
-        sendMessage('problemEqual')
-    }
-}
-
-function sendMessage(message) {
-    const contentBox = document.getElementById('content')
-    const container = document.querySelector('.message-container')
-    container.style.opacity = 1
-    if (message === 'problem13') {
-        contentBox.innerHTML = 'The cards selected in your hand or on the table exceed 13!'
-    }
-    else if (message === 'problemEqual') {
-        contentBox.innerHTML = 'Sum of the values of the selected cards on the table and in your hand are not equal!'
-    }
-
-    setTimeout(() => {
-        container.style.opacity = 0
-    }, 5000)
 }
 
 function getValue(card) {
@@ -465,13 +451,169 @@ function getValue(card) {
     }
 }
 
+class Computer {
+    constructor() {
+        this.hand = computerHand;
+        this.tableSelected = [];
+        this.computerSelected = [];
+        this.wonCards = cardsWonByComputer;
+        this.finalCards = computerFinalCards;
+        this.placedCard = ''
+    }
+
+    isLegalMove() {
+        let computerSum = 0;
+        let tableSum = 0;
+
+        for (let i = 0; i < this.computerSelected.length; i++) {
+            computerSum += parseInt(getValue(this.computerSelected[i]))
+        }
+
+        for (let i = 0; i < this.tableSelected.length; i++) {
+            tableSum += parseInt(getValue(this.tableSelected[i]))
+        }
+
+        if (computerSum <= 13 && tableSum <= 13 && tableSum === computerSum) {
+            return true
+        }
+        else {
+            return false
+        }
+    }
+
+    captureCards() {
+        for (let i = 0; i < this.hand.length; i++) {
+            const card = this.hand[i];
+    
+            for (let j = 0; j < tableCards.length; j++) {
+                const tableCard = tableCards[j];
+    
+                if (parseInt(getValue(card)) === parseInt(getValue(tableCard))) {
+                    this.tableSelected.push(tableCard);
+                    this.computerSelected.push(card);
+                    break;
+                }
+            }
+        }
+        if (this.tableSelected.length > 0 && this.computerSelected.length > 0) {
+            if (this.isLegalMove) {
+                this.wonCards = []
+                this.tableSelected.forEach(card => {
+                    this.wonCards.push(card)
+                    this.finalCards.push(card)
+                })
+                this.computerSelected.forEach(card => {
+                    this.wonCards.push(card)
+                    this.finalCards.push(card)
+                })
+            }
+        }
+        else {
+            this.placeCard()
+        }
+    }
+
+    placeCard() {
+        const randomIndex = Math.floor(Math.random() * this.hand.length);
+        this.placedCard = this.hand[randomIndex]
+    }
+
+}
+
+const opponent = new Computer();
+const computerWonDeck = document.getElementById('computer-wonDeck')
+
+function computerMove() {
+
+    opponent.captureCards()
+    if (opponent.wonCards.length > 0) {
+        console.log(opponent.wonCards)
+        opponent.wonCards.forEach(element => {
+            const card = document.getElementById(element)
+            const parent = card.parentNode
+            const grandParent = parent.parentNode
+
+            const originalPos = parent.getBoundingClientRect();
+            const newPosition = computerWonDeck.getBoundingClientRect();
+            
+            moveCard(card, parent, computerWonDeck)
+            card.style.position = 'absolute'
+
+            anime({
+                begin: () => {
+                    computerWonDeck.style.opacity = 1
+                },
+                targets: card,
+                translateX: [originalPos.left - newPosition.left, 0],
+                translateY: [(originalPos.top - newPosition.top), 0],
+                easing: 'easeOutCubic',
+                duration: 1500,
+                update: function (anim) {
+                    if (anim.progress > 20) {
+                        card.classList.add('flip')
+                    }
+                },
+                complete: () => {
+                    computerWonDeck.style.opacity = 0
+                    computerWonDeck.removeChild(card)
+                }
+            })
+            if (parent.classList.contains('table-pos')) {
+                grandParent.removeChild(parent)
+            }
+        })
+    }
+    else {
+        opponent.placeCard()
+
+        let highestNumber = 0;
+        document.querySelectorAll('[id^="tab-pos-"]').forEach(element => {
+            const number = parseInt(element.id.replace('tab-pos-', ''), 10)
+            highestNumber = Math.max(highestNumber, number)
+        })
+        const newId = 'tab-pos-' + (highestNumber + 1)
+
+        const newTablePosition = createElement('div')
+        addClass(newTablePosition, 'table-pos')
+        
+        const table = document.querySelector('.table')
+        appendChild(table, newTablePosition)
+
+        addID(newTablePosition, newId)
+
+        placeComputerCard(newTablePosition)
+    }
+}
+
+function placeComputerCard(newParent) {
+    const movedCard = document.getElementById(opponent.placedCard);
+    const parent = movedCard.parentNode;
+
+    parent.removeChild(movedCard);
+    newParent.appendChild(movedCard);
+    
+    const originalPos = parent.getBoundingClientRect()
+    const newPosition = newParent.getBoundingClientRect()
+
+    anime({
+        targets: movedCard,
+        translateX: [originalPos.left - newPosition.left, 0],
+        translateY: [(originalPos.top - newPosition.top), 0],
+        easing: 'easeOutQuad',
+        duration: 600,
+        complete: () => {
+            movedCard.classList.add('flip')
+        }
+    });
+}
+
 function startGame() {
     createDeck()
     shuffleDeck()
     firstDeal()
-    console.log(computerHand)
-    console.log(tableCards)
-    console.log(playerHand)
+    //console.log(computerHand)
+    //console.log(tableCards)
+    //console.log(playerHand)
 }
 
 startGame()

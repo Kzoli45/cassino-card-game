@@ -26,43 +26,11 @@ body {
     align-items: center;
 }
 
-.message-container {
-    position: absolute;
-    top: 12%;
-    background-color: #3d5267;
-    max-width: 12%;
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    border-radius: 0.5rem;
-    opacity: 0;
-    transition: 0.5s ease-in-out;
-    justify-content: center;
-}
-
-.inner-content {
-    width: 60%;
-    max-width: 100%;
-    padding: .8rem 0.5rem;
-}
-
-#message {
-    font-size: 1.5rem;
-    font-weight: 800;
-    text-transform: uppercase;
-}
-
-#content {
-    line-height: 1.2;
-    font-size: 1rem;
-    font-weight: 300;
-    opacity: 1;
-}
-
 .deck {
     padding-left: .5rem;
     padding-right: .5rem;
     width: 5em;
+    min-width: 4.5em;
     height: 7.9em;
     background-color: darkred;
     box-shadow: inset 0 0 0 4px #fff;
