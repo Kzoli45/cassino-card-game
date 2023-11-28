@@ -420,6 +420,28 @@ function moveCardsToWonDeck() {
             }
         })
     }
+    else if(playerSum > 13 || tableSum > 13) {
+        sendMessage('problem13')
+    }
+    else if(playerSum !== tableSum) {
+        sendMessage('problemEqual')
+    }
+}
+
+function sendMessage(message) {
+    const contentBox = document.getElementById('content')
+    const container = document.querySelector('.message-container')
+    container.style.opacity = 1
+    if (message === 'problem13') {
+        contentBox.innerHTML = 'The cards selected in your hand or on the table exceed 13!'
+    }
+    else if (message === 'problemEqual') {
+        contentBox.innerHTML = 'Sum of the values of the selected cards on the table and in your hand are not equal!'
+    }
+
+    setTimeout(() => {
+        container.style.opacity = 0
+    }, 5000)
 }
 
 function getValue(card) {

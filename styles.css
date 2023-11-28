@@ -4,13 +4,14 @@ body {
     box-sizing: border-box;
 }
 
+
 .game-container {
     width: 80%;
     display: flex;
     flex-direction: column;
     margin: .5rem auto;
     margin-top: 100px;
-    background-color: #0F212E;;
+    background-color: #0F212E;
     border-radius: 1rem;
     padding: .5rem .8rem;
 }
@@ -23,6 +24,39 @@ body {
     flex-direction: row;
     justify-content: center;
     align-items: center;
+}
+
+.message-container {
+    position: absolute;
+    top: 12%;
+    background-color: #3d5267;
+    max-width: 12%;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    border-radius: 0.5rem;
+    opacity: 0;
+    transition: 0.5s ease-in-out;
+    justify-content: center;
+}
+
+.inner-content {
+    width: 60%;
+    max-width: 100%;
+    padding: .8rem 0.5rem;
+}
+
+#message {
+    font-size: 1.5rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+#content {
+    line-height: 1.2;
+    font-size: 1rem;
+    font-weight: 300;
+    opacity: 1;
 }
 
 .deck {
@@ -129,9 +163,8 @@ body {
 .computer-hand div:nth-child(3),
 .player-hand div:nth-child(2),
 .player-hand div:nth-child(3) {
-    margin-left: -3%;
+    margin-left: -2.5%;
 }
-
 
 .card {
     background-color: transparent;
