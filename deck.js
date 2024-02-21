@@ -25,34 +25,8 @@ function shuffleDeck() {
     //console.log(deck)
 }
 
-/*
-    <div class="card">
-        <div class="card-inner">
-            <div class="card-front">
-                <span>J</span>
-                <span id="suit">♣</span>
-                <span>J</span>
-            </div>
-            <div class="card-back"></div>
-        </div>
-    </div>
-*/
-
-/*
-    <div class="card">
-        <div class="card-inner">
-            <div class="cpu-card-front"></div>
-            <div class="cpu-card-back">
-                <span>J</span>
-                <span id="suit">♣</span>
-                <span>J</span>
-            </div>
-        </div>
-    </div>
-*/
-
 function createCard(parent, toHand, faceCard) {
-    let card = deck.pop(deck.length - 1)
+    let card = deck.pop()
     let temp = card.split('-')
     let rank = temp[1]
     let color = temp[0]
@@ -149,11 +123,52 @@ function dealCards() {
     dealToComputer()
 }
 
+function checkHandsEmpty() {
+    return playerHand.length === 0 && computerHand.length === 0;
+}
+
 function firstDeal() {
     dealCards()
     dealToTable()
     removeTemps()
-    console.log(deck.length)
+    //console.log(deck.length)
+    currentPlayer = Math.random() < 0.5 ? 'player' : 'computer';
+    console.log(`Starting turn: ${currentPlayer}`);
+    if (currentPlayer === 'computer') {
+        setTimeout(computerMove, 4000);
+    }
+}
+
+function switchPlayer() {
+    currentPlayer = currentPlayer === 'player' ? 'computer' : 'player';
+    console.log(`Current turn: ${currentPlayer}`);
+    if (currentPlayer === 'computer') {
+        if (checkHandsEmpty()) {
+            setTimeout(computerMove, 7000);
+        }
+        else {
+            setTimeout(computerMove, 3000)
+        }
+    }
+}
+
+let currentRound = 1
+
+function dealNewCards() {
+    if (deck.length > 0) {
+        const positions = document.querySelectorAll('.player-pos')
+        positions.forEach(element => {
+        element.style.display = '' })
+
+        setTimeout(() => {
+            dealToPlayer();
+            dealToComputer();
+        }, 1500)
+    } else {
+        console.log('Deck is empty!');
+    }
+    currentRound += 1
+    console.log(currentRound)
 }
 
 function removeTemps() {
@@ -163,14 +178,6 @@ function removeTemps() {
 }
 
 const deckPosition = document.querySelector('.deck');
-
-/*deckPosition.addEventListener(('click'), () => {
-    dealCards();
-    dealToTable();
-    removeTemps();
-    console.log(deck.length)
-})
-*/
 
 function dealToTable() {
     const table = document.querySelectorAll('.table-pos');
@@ -243,42 +250,44 @@ function addCardClick(cardElement) {
 playCardsButton = document.querySelector('.btn')
 
 function selectAnimation(card) {
-    if(card.classList.contains('selected')) {
-        anime ({
-            targets: card,
-            translateY: 0,
-            duration: 200,
-            easing: 'easeInOutQuad',
-            complete: () => {
-                card.classList.remove('selected')
-                const cards = document.querySelectorAll('.card')
-                let isSelecetd = Array.from(cards).some(e => e.classList.contains('selected') && e.closest('.player-pos'))
+    if (currentPlayer === 'player') {
+        if(card.classList.contains('selected')) {
+            anime ({
+                targets: card,
+                translateY: 0,
+                duration: 200,
+                easing: 'easeInOutQuad',
+                complete: () => {
+                    card.classList.remove('selected')
+                    const cards = document.querySelectorAll('.card')
+                    let isSelecetd = Array.from(cards).some(e => e.classList.contains('selected') && e.closest('.player-pos'))
 
-                if(!isSelecetd) {
-                    playCardsButton.style.opacity = 0;
-                    playCardsButton.style.cursor = '';
-                    playCardsButton.style.pointerEvents = 'none'
-                }
+                    if(!isSelecetd) {
+                        playCardsButton.style.opacity = 0;
+                        playCardsButton.style.cursor = '';
+                        playCardsButton.style.pointerEvents = 'none'
+                    }
 
-            }
-        })
-    }
-    else {
-        anime ({
-            targets: card,
-            translateY: -20,
-            duration: 200,
-            easing: 'easeInOutQuad',
-            complete: () => {
-                card.classList.add('selected')
-                
-                if (card.closest('.player-pos')) {
-                    playCardsButton.style.opacity = 1;
-                    playCardsButton.style.cursor = 'pointer';
-                    playCardsButton.style.pointerEvents = ''
                 }
-            }
-        })
+            })
+        }
+        else {
+            anime ({
+                targets: card,
+                translateY: -20,
+                duration: 200,
+                easing: 'easeInOutQuad',
+                complete: () => {
+                    card.classList.add('selected')
+                    
+                    if (card.closest('.player-pos')) {
+                        playCardsButton.style.opacity = 1;
+                        playCardsButton.style.cursor = 'pointer';
+                        playCardsButton.style.pointerEvents = ''
+                    }
+                }
+            })
+        }
     }
 }
 
@@ -293,46 +302,63 @@ let cardsWonByComputer = []
 let computerFinalCards = []
 
 playCardsButton.addEventListener('click', () => {
-    selectedFromPlayer = [];
-    selectedFromTable = [];
-    const selectedCards = document.querySelectorAll('.selected')
-    selectedCards.forEach((card)  => {
-        if (card.closest('.player-pos')) {
-            selectedFromPlayer.push(card.id)
-        }
-        else if (card.closest('.table-pos')) {
-            selectedFromTable.push(card.id)
-        }
-        selectAnimation(card)
-    })
+    if (currentPlayer === 'player') {
+        selectedFromPlayer = [];
+        selectedFromTable = [];
+        let originalArray = [...tableCards]
+        console.log(originalArray)
+        const selectedCards = document.querySelectorAll('.selected')
+        selectedCards.forEach((card)  => {
+            if (card.closest('.player-pos')) {
+                selectedFromPlayer.push(card.id)
+            }
+            else if (card.closest('.table-pos')) {
+                selectedFromTable.push(card.id)
+            }
+            selectAnimation(card)
+            })
+    
+            //console.log(selectedFromPlayer)
+            //console.log(selectedFromTable)
+    
+            if (selectedFromPlayer.length === 1 && selectedFromTable.length === 0) {
+                let highestNumber = 0;
+                document.querySelectorAll('[id^="tab-pos-"]').forEach(element => {
+                const number = parseInt(element.id.replace('tab-pos-', ''), 10)
+                highestNumber = Math.max(highestNumber, number)
+                })
+                const newId = 'tab-pos-' + (highestNumber + 1)
+            
+                const newTablePosition = createElement('div')
+                addClass(newTablePosition, 'table-pos')
+                    
+                const table = document.querySelector('.table')
+                appendChild(table, newTablePosition)
+            
+                addID(newTablePosition, newId)
+            
+                placeCardOnTable(newTablePosition)
+                }
+                else {
+                    moveCardsToWonDeck()
+                }
 
-    //console.log(selectedFromPlayer)
-    //console.log(selectedFromTable)
-    if (selectedFromPlayer.length === 1 && selectedFromTable.length === 0) {
-        let highestNumber = 0;
-        document.querySelectorAll('[id^="tab-pos-"]').forEach(element => {
-            const number = parseInt(element.id.replace('tab-pos-', ''), 10)
-            highestNumber = Math.max(highestNumber, number)
-        })
-        const newId = 'tab-pos-' + (highestNumber + 1)
+                let newArray = [...tableCards]
+                
+                if (originalArray.length !== newArray.length) {
+                    if (computerHand.length > 0) {
+                        switchPlayer()
+                    }
+                    else {
+                        if (checkHandsEmpty()) {
+                            dealNewCards();
+                        }
+                        currentPlayer = 'player'
+                    }
+                }
 
-        const newTablePosition = createElement('div')
-        addClass(newTablePosition, 'table-pos')
-        
-        const table = document.querySelector('.table')
-        appendChild(table, newTablePosition)
-
-        addID(newTablePosition, newId)
-
-        placeCardOnTable(newTablePosition)
+                console.log(playerFinalCards)
     }
-    else {
-        moveCardsToWonDeck()
-    }
-
-    setTimeout(() => {
-        computerMove();
-    }, 2000);
 })
 
 function placeCardOnTable(newParent) {
@@ -341,6 +367,17 @@ function placeCardOnTable(newParent) {
 
     parent.removeChild(movedCard);
     newParent.appendChild(movedCard);
+
+    const indexToRemove = playerHand.indexOf(selectedFromPlayer[0]);
+
+    if (indexToRemove !== -1) {
+        playerHand.splice(indexToRemove, 1);
+    }
+
+    tableCards.push(selectedFromPlayer[0])
+
+    //console.log(`new player hand: ${playerHand}`)
+    //console.log(`new table: ${tableCards}`)
     
     const originalPos = parent.getBoundingClientRect()
     const newPosition = newParent.getBoundingClientRect()
@@ -386,9 +423,22 @@ function moveCardsToWonDeck() {
             cardsWonByPlayer.push(card)
             playerFinalCards.push(card)
         })
-        console.log(cardsWonByPlayer)
-        console.log(playerFinalCards)
+        //console.log(cardsWonByPlayer)
+        //console.log(playerFinalCards)
         cardsWonByPlayer.forEach((element) => {
+
+        const tableIndexToRemove = tableCards.indexOf(element);
+        if (tableIndexToRemove !== -1) {
+            tableCards.splice(tableIndexToRemove, 1);
+            //console.log(`new table after capture: ${tableCards}`)
+        }
+
+        const playerIndexToRemove = playerHand.indexOf(element);
+        if (playerIndexToRemove !== -1) {
+            playerHand.splice(playerIndexToRemove, 1);
+            //console.log(`new player hand after capture: ${playerHand}`)
+        }
+
             const card = document.getElementById(element)
             const parent = card.parentNode
             const grandParent = parent.parentNode
@@ -451,158 +501,84 @@ function getValue(card) {
     }
 }
 
-class Computer {
-    constructor() {
-        this.hand = computerHand;
-        this.tableSelected = [];
-        this.computerSelected = [];
-        this.wonCards = cardsWonByComputer;
-        this.finalCards = computerFinalCards;
-        this.placedCard = ''
-    }
-
-    isLegalMove() {
-        let computerSum = 0;
-        let tableSum = 0;
-
-        for (let i = 0; i < this.computerSelected.length; i++) {
-            computerSum += parseInt(getValue(this.computerSelected[i]))
-        }
-
-        for (let i = 0; i < this.tableSelected.length; i++) {
-            tableSum += parseInt(getValue(this.tableSelected[i]))
-        }
-
-        if (computerSum <= 13 && tableSum <= 13 && tableSum === computerSum) {
-            return true
-        }
-        else {
-            return false
-        }
-    }
-
-    captureCards() {
-        for (let i = 0; i < this.hand.length; i++) {
-            const card = this.hand[i];
-    
-            for (let j = 0; j < tableCards.length; j++) {
-                const tableCard = tableCards[j];
-    
-                if (parseInt(getValue(card)) === parseInt(getValue(tableCard))) {
-                    this.tableSelected.push(tableCard);
-                    this.computerSelected.push(card);
-                    break;
-                }
-            }
-        }
-        if (this.tableSelected.length > 0 && this.computerSelected.length > 0) {
-            if (this.isLegalMove) {
-                this.wonCards = []
-                this.tableSelected.forEach(card => {
-                    this.wonCards.push(card)
-                    this.finalCards.push(card)
-                })
-                this.computerSelected.forEach(card => {
-                    this.wonCards.push(card)
-                    this.finalCards.push(card)
-                })
-            }
-        }
-        else {
-            this.placeCard()
-        }
-    }
-
-    placeCard() {
-        const randomIndex = Math.floor(Math.random() * this.hand.length);
-        this.placedCard = this.hand[randomIndex]
-    }
-
-}
-
-const opponent = new Computer();
-const computerWonDeck = document.getElementById('computer-wonDeck')
-
 function computerMove() {
+    ComputerSelectCardToPlay()
 
-    opponent.captureCards()
-    if (opponent.wonCards.length > 0) {
-        console.log(opponent.wonCards)
-        opponent.wonCards.forEach(element => {
-            const card = document.getElementById(element)
-            const parent = card.parentNode
-            const grandParent = parent.parentNode
+    let highestNumber = 0
 
-            const originalPos = parent.getBoundingClientRect();
-            const newPosition = computerWonDeck.getBoundingClientRect();
-            
-            moveCard(card, parent, computerWonDeck)
-            card.style.position = 'absolute'
+    document.querySelectorAll('[id^="tab-pos-"]').forEach(element => {
+        const number = parseInt(element.id.replace('tab-pos-', ''), 10)
+        highestNumber = Math.max(highestNumber, number)
+    })
 
-            anime({
-                begin: () => {
-                    computerWonDeck.style.opacity = 1
-                },
-                targets: card,
-                translateX: [originalPos.left - newPosition.left, 0],
-                translateY: [(originalPos.top - newPosition.top), 0],
-                easing: 'easeOutCubic',
-                duration: 1500,
-                update: function (anim) {
-                    if (anim.progress > 20) {
-                        card.classList.add('flip')
-                    }
-                },
-                complete: () => {
-                    computerWonDeck.style.opacity = 0
-                    computerWonDeck.removeChild(card)
-                }
-            })
-            if (parent.classList.contains('table-pos')) {
-                grandParent.removeChild(parent)
-            }
-        })
+    const newId = 'tab-pos-' + (highestNumber + 1)
+    
+    const newTablePosition = createElement('div')
+    addClass(newTablePosition, 'table-pos')
+        
+    const table = document.querySelector('.table')
+    appendChild(table, newTablePosition)
+
+    addID(newTablePosition, newId)
+
+    placeComputerCard(newTablePosition)
+
+    if (playerHand.length > 0) {
+        switchPlayer()
     }
     else {
-        opponent.placeCard()
+        if (checkHandsEmpty()) {
+            dealNewCards()
+        }
+        currentPlayer = 'computer'
+        setTimeout(computerMove, 2000)
+    }
+}
 
-        let highestNumber = 0;
-        document.querySelectorAll('[id^="tab-pos-"]').forEach(element => {
-            const number = parseInt(element.id.replace('tab-pos-', ''), 10)
-            highestNumber = Math.max(highestNumber, number)
-        })
-        const newId = 'tab-pos-' + (highestNumber + 1)
+let placedCPUCard = ''
 
-        const newTablePosition = createElement('div')
-        addClass(newTablePosition, 'table-pos')
-        
-        const table = document.querySelector('.table')
-        appendChild(table, newTablePosition)
+function ComputerSelectCardToPlay() {
+    if (computerHand.length > 0) {
+        if (computerHand.length === 1) {
+            placedCPUCard = computerHand[0]
+        }
+        else {
+            const randomIndex = Math.floor(Math.random() * computerHand.length)
+            placedCPUCard = computerHand[randomIndex]
+        }
 
-        addID(newTablePosition, newId)
-
-        placeComputerCard(newTablePosition)
+        //console.log(`Card placed by computer: ${placedCPUCard}`)
     }
 }
 
 function placeComputerCard(newParent) {
-    const movedCard = document.getElementById(opponent.placedCard);
-    const parent = movedCard.parentNode;
+    const cardToMove = document.getElementById(placedCPUCard)
+    const cardParent = cardToMove.parentNode
+    const indexToRemove = computerHand.indexOf(placedCPUCard)
 
-    parent.removeChild(movedCard);
-    newParent.appendChild(movedCard);
-    
-    const originalPos = parent.getBoundingClientRect()
+    if (indexToRemove !== -1) {
+        computerHand.splice(indexToRemove, 1)
+    }
+
+    moveCard(cardToMove, cardParent, newParent)
+    addCardClick(cardToMove)
+
+    tableCards.push(placedCPUCard)
+
+    //console.log(`New computer hand: ${computerHand}`)
+    //console.log(`New table: ${tableCards}`)
+
+    const originalPos = cardParent.getBoundingClientRect()
     const newPosition = newParent.getBoundingClientRect()
 
     anime({
-        targets: movedCard,
+        targets: cardToMove,
         translateX: [originalPos.left - newPosition.left, 0],
         translateY: [(originalPos.top - newPosition.top), 0],
         easing: 'easeOutQuad',
         duration: 600,
         complete: () => {
-            movedCard.classList.add('flip')
+        cardToMove.classList.add('flip')
         }
     });
 }
@@ -617,4 +593,3 @@ function startGame() {
 }
 
 startGame()
-
